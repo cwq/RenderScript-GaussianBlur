@@ -27,7 +27,7 @@ public final class FastBlurHelper {
             bitmap = sentBitmap;
         } else {
             sentBitmap = Bitmap.createScaledBitmap(sentBitmap, (int)Math.round(sentBitmap.getWidth()*0.5), (int)Math.round(sentBitmap.getHeight()*0.5), false);
-            bitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, true);//false);
+            bitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, false);//true);
         }
 
         if (bitmap == null) {
@@ -64,7 +64,7 @@ public final class FastBlurHelper {
             // necessarily be copied when converting to ARGB_8888
         } else {
             sentBitmap = Bitmap.createScaledBitmap(sentBitmap, (int)Math.round(sentBitmap.getWidth()*0.5), (int)Math.round(sentBitmap.getHeight()*0.5), false);
-            sentBitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, true);//false);
+            sentBitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, false);//true);
         }
         
         bitmap = Bitmap.createBitmap(sentBitmap.getWidth(), sentBitmap.getHeight(), Bitmap.Config.ARGB_8888);
