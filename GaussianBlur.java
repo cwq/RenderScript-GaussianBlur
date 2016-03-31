@@ -14,7 +14,7 @@ public final class FastBlurHelper {
 
     }
 
-    public static Bitmap doBlur(Context ctx, Bitmap sentBitmap, int radius, boolean canReuseInBitmap) {
+    public static Bitmap doBlur1(Context ctx, Bitmap sentBitmap, int radius, boolean canReuseInBitmap) {
 
         if (radius < 0 || radius > 25 || sentBitmap == null) {
             return (null);
@@ -27,7 +27,7 @@ public final class FastBlurHelper {
             bitmap = sentBitmap;
         } else {
             sentBitmap = Bitmap.createScaledBitmap(sentBitmap, (int)Math.round(sentBitmap.getWidth()*0.5), (int)Math.round(sentBitmap.getHeight()*0.5), false);
-            bitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, false);//ture);
+            bitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, true);//false);
         }
 
         if (bitmap == null) {
@@ -37,7 +37,7 @@ public final class FastBlurHelper {
         RenderScript rs = RenderScript.create(ctx);
 
         Allocation inAlloc = Allocation.createFromBitmap(rs, bitmap);
-        Allocation outAlloc = Allocation.createTyped(rs, inAlloc.getType());//createFromBitmap(rs, bitmap); error:same bitmap?
+        Allocation outAlloc = Allocation.createTyped(rs, inAlloc.getType());
 
         // must ARGB_8888 Element.U8_4
         ScriptIntrinsicBlur theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));//inAlloc.getElement());
@@ -46,6 +46,46 @@ public final class FastBlurHelper {
         theIntrinsic.forEach(outAlloc);
 
         outAlloc.copyTo(bitmap);
+
+        rs.destroy();
+
+        return (bitmap);
+    }
+    
+    public static Bitmap doBlur2(Context ctx, Bitmap sentBitmap, int radius, boolean canReuseInBitmap) {
+
+        if (radius < 0 || radius > 25 || sentBitmap == null) {
+            return (null);
+        }
+
+        Bitmap bitmap;
+        if (canReuseInBitmap) {
+            // if RenderScript is used and bitmap is in RGB_565, it will
+            // necessarily be copied when converting to ARGB_8888
+        } else {
+            sentBitmap = Bitmap.createScaledBitmap(sentBitmap, (int)Math.round(sentBitmap.getWidth()*0.5), (int)Math.round(sentBitmap.getHeight()*0.5), false);
+            sentBitmap = sentBitmap.copy(Bitmap.Config.ARGB_8888, true);//false);
+        }
+        
+        bitmap = Bitmap.createBitmap(sentBitmap.getWidth(), sentBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        if (bitmap == null) {
+            return null;
+        }
+
+        RenderScript rs = RenderScript.create(ctx);
+
+        Allocation inAlloc = Allocation.createFromBitmap(rs, sentBitmap);
+        Allocation outAlloc = Allocation.createFromBitmap(rs, bitmap);
+
+        // must ARGB_8888 Element.U8_4
+        ScriptIntrinsicBlur theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));//inAlloc.getElement());
+        theIntrinsic.setRadius(radius);
+        theIntrinsic.setInput(inAlloc);
+        theIntrinsic.forEach(outAlloc);
+
+        // outAlloc createFrom bitmp, so do not need copy
+        // outAlloc.copyTo(bitmap);
 
         rs.destroy();
 
