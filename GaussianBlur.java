@@ -37,9 +37,10 @@ public final class FastBlurHelper {
         RenderScript rs = RenderScript.create(ctx);
 
         Allocation inAlloc = Allocation.createFromBitmap(rs, bitmap);
-        Allocation outAlloc = Allocation.createTyped(rs, inAlloc.getType());//createFromBitmap(rs, bitmap);
+        Allocation outAlloc = Allocation.createTyped(rs, inAlloc.getType());//createFromBitmap(rs, bitmap); error:same bitmap?
 
-        ScriptIntrinsicBlur theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        // must ARGB_8888 Element.U8_4
+        ScriptIntrinsicBlur theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));//inAlloc.getElement());
         theIntrinsic.setRadius(radius);
         theIntrinsic.setInput(inAlloc);
         theIntrinsic.forEach(outAlloc);
